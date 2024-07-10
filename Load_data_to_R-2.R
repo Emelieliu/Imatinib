@@ -71,13 +71,13 @@ imatinib[["percent.mt"]] <- PercentageFeatureSet(imatinib, pattern = "^MT-")
 
 #PRE-PROCESS WORKFLOW
 # Visualize QC metrics as a violin plot, imatinib
-  #VlnPlot(imatinib, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
+  VlnPlot(imatinib, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3)
 
 #dessa reglerar axlarna för violinplot, subset = ta bort, irrelivanta men inte cutta för tidigt 
 #imatinib
-  #plot1 <- FeatureScatter(imatinib, feature1 = "nCount_RNA", feature2 = "percent.mt")
-  #plot2 <- FeatureScatter(imatinib, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
-  #plot1 + plot2
+  plot1 <- FeatureScatter(imatinib, feature1 = "nCount_RNA", feature2 = "percent.mt")
+  plot2 <- FeatureScatter(imatinib, feature1 = "nCount_RNA", feature2 = "nFeature_RNA")
+  plot1 + plot2
 imatinib <- subset(imatinib, subset = nFeature_RNA > 1000 & nFeature_RNA < 12500 & percent.mt < 15)
 
 
@@ -92,10 +92,10 @@ imatinib <- NormalizeData(imatinib)
 imatinib <- FindVariableFeatures(imatinib, selection.method = "vst", nfeatures = 2000)
 # Identify the 10 most highly variable genes
 top10 <- head(VariableFeatures(imatinib), 10)
-# plot variable features with and without labels
-  #plot1 <- VariableFeaturePlot(imatinib)
-  #plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
-  #plot1 + plot2
+plot variable features with and without labels
+  plot1 <- VariableFeaturePlot(imatinib)
+  plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+  plot1 + plot2
 #sticker ut mycket - statistiskt konstig från resten
 
 
@@ -110,19 +110,19 @@ imatinib <- ScaleData(imatinib, features = all.genes)
 #första 5 PC, kolla på 10 gener
 #imatinib
 imatinib <- RunPCA(imatinib, features = VariableFeatures(object = imatinib))
-#print(imatinib[["pca"]], dims = 1:5, nfeatures = 10)
+print(imatinib[["pca"]], dims = 1:5, nfeatures = 10)
 
-  #VizDimLoadings(imatinib, dims = 1:5, reduction = "pca", ncol = 5)
+ VizDimLoadings(imatinib, dims = 1:5, reduction = "pca", ncol = 5)
 
 DimPlot(imatinib, reduction = "pca", group.by = "stim", cols = c("blue", "red")) 
 #+ NoLegend()
 
-  #DimHeatmap(imatinib, dims = 1:6, cells = 1500, balanced = TRUE)
+ DimHeatmap(imatinib, dims = 1:6, cells = 1500, balanced = TRUE)
 
 
 #DIMENSIONALITY
 #Imatinib
-  #ElbowPlot(imatinib, ndims = 30)
+ ElbowPlot(imatinib, ndims = 30)
 
 
 #CLUSTER CELLS
@@ -139,49 +139,41 @@ imatinib <- RunUMAP(imatinib, dims = 1:8)
 #få fram cluster
 DimPlot(imatinib, reduction = "umap")
 #dela upp i blå och röd beroende på vilket dataset datan kommer ifrån
-#DimPlot(imatinib, reduction = "umap", group.by = "stim", cols = c("blue", "red"))
+DimPlot(imatinib, reduction = "umap", group.by = "stim", cols = c("blue", "red"))
 
 
 #INSTALL PRESTO --> faster
-#install.packages("devtools")
-#devtools::install_github("immunogenomics/presto")
+install.packages("devtools")
+devtools::install_github("immunogenomics/presto")
 
 
 imatinib <- JoinLayers(imatinib)
 
 #CLUSTER BIOMARKER
 #look at p_val_adj value
-#imatinib
-#markers in imatinib - red (cluster i)
-#clusteri.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4, 5))
-#head(clusteri.markers, n = 5)
+imatinib
+markers in imatinib - red (cluster i)
+clusteri.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4, 5))
+head(clusteri.markers, n = 5)
 
 #cluster ctrl, blå
-#clusterctrl.markers <- FindMarkers(imatinib, ident.1 = c(0, 2))
-#head(clusterctrl.markers, n = 5)
+clusterctrl.markers <- FindMarkers(imatinib, ident.1 = c(0, 2))
+head(clusterctrl.markers, n = 5)
 
 #imat vs imat (rosa5 vs resten imat)
-#clusterimat.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4), ident.2 = 5)
-#head(clusterimat.markers, n = 5)
+clusterimat.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4), ident.2 = 5)
+head(clusterimat.markers, n = 5)
 
 #ctrl vs imatinib
-#clusterc.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4, 5), ident.2 = c(0, 2))
-#head(clusterc.markers, n = 5)
-
-
-
-#FeaturePlot(imatinib, features = c("ABCB1", "ABCG2", "CYP1A2", "BCR", "ABL1", "OIP5", "CTSB", "MUL1", "TNFAIP3", "SLC22A1"))
-#FeaturePlot(imatinib, features = c("BCR", "ABL1", "DHRS2", "CALB1", "HBZ", "HBA2", "GAPDH", "HSPA1A"))
+clusterc.markers <- FindMarkers(imatinib, ident.1 = c(1, 3, 4, 5), ident.2 = c(0, 2))
+head(clusterc.markers, n = 5)
 
 #ctr vs imatinib
-#FeaturePlot(imatinib, features = c("AL034397.3", "KIFC3", "SLC4A1", "ESPN", "AL034397.2"))
+FeaturePlot(imatinib, features = c("AL034397.3", "KIFC3", "SLC4A1", "ESPN", "AL034397.2"))
 
-#imatinib vs imatinib
-#FeaturePlot(imatinib, features = c("GADD45B", "ERRFI1", "PLCG2", "EGR1", "SGK1"))
+imatinib vs imatinib
+FeaturePlot(imatinib, features = c("GADD45B", "ERRFI1", "PLCG2", "EGR1", "SGK1"))
 
-#random 
-#FeaturePlot(imatinib, features = c("HBZ", "HBA2"))
-#FeaturePlot(imatinib, features = c("GAPDH", "HSPA1A"))
 
 library(dplyr)
 
@@ -210,12 +202,12 @@ DoHeatmap(imatinib, features = top10$gene)
 #+ NoLegend()
 
 # Ridge plots - from ggridges. Visualize single cell expression distributions in each cluster
-RidgePlot(pbmc3k.final, features = features, ncol = 2)
+#RidgePlot(pbmc3k.final, features = features, ncol = 2)
 
-imatinib.markers <- FindAllMarkers(imatinib, only.pos = TRUE)
-imatinib.markers %>%
-  group_by(cluster) %>%
-  dplyr::filter(avg_log2FC > 1)
+#imatinib.markers <- FindAllMarkers(imatinib, only.pos = TRUE)
+#imatinib.markers %>%
+ # group_by(cluster) %>%
+ # dplyr::filter(avg_log2FC > 1)
 
 saveRDS(imatinib, file = "imatinib_merge_data_tillcluster")
 
